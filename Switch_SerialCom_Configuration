@@ -1,0 +1,109 @@
+Imports System
+Imports System.Threading
+Imports System.IO.Ports
+Imports System.ComponentModel
+
+
+Public Class Form1
+
+
+    '------------------------------------------------
+
+
+    Dim myPort As Array
+    Delegate Sub SetTextCallback(ByVal [text] As String) 'Added to prevent threading errors during receiveing of data
+    '------------------------------------------------
+    Private Sub Form1_Load(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MyBase.Load
+
+        myPort = IO.Ports.SerialPort.GetPortNames()
+        ComboBox1.Items.AddRange(myPort)
+
+        Button2.Enabled = False
+
+    End Sub
+    '------------------------------------------------
+    Private Sub ComboBox1_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles ComboBox1.Click
+    End Sub
+    '------------------------------------------------
+    Private Sub Button1_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles Button1.Click
+        SerialPort1.PortName = ComboBox1.Text
+        SerialPort1.BaudRate = ComboBox2.Text
+        SerialPort1.Open()
+        Button1.Enabled = False
+        Button2.Enabled = True
+        Button4.Enabled = True
+
+    End Sub
+    '------------------------------------------------
+    Private Sub Button2_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles Button2.Click
+
+        SerialPort1.Write(RichTextBox1.Text & vbCr) 
+        RichTextBox1.Clear()
+
+
+
+    End Sub
+
+    Private Sub Button4_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles Button4.Click
+        SerialPort1.Close()
+        Button1.Enabled = True
+        Button2.Enabled = False
+        Button4.Enabled = False
+    End Sub
+
+    Private Sub SerialPort1_DataReceived(ByVal sender As System.Object, ByVal e As System.IO.Ports.SerialDataReceivedEventArgs) Handles SerialPort1.DataReceived
+        ReceivedText(SerialPort1.ReadExisting())
+    End Sub
+
+    Private Sub ReceivedText(ByVal [text] As String) 'input from ReadExisting
+        If Me.RichTextBox2.InvokeRequired Then
+            Dim x As New SetTextCallback(AddressOf ReceivedText)
+            Me.Invoke(x, New Object() {(text)})
+        Else
+            Me.RichTextBox2.Text &= [text] 
+        End If
+    End Sub
+
+    Private Sub Label3_Click(ByVal sender As System.Object, ByVal e As System.EventArgs)
+
+    End Sub
+
+    Private Sub Label3_Click_1(ByVal sender As System.Object, ByVal e As System.EventArgs)
+
+    End Sub
+
+
+
+    Private Sub RichTextBox3_TextChanged(ByVal sender As System.Object, ByVal e As System.EventArgs)
+
+    End Sub
+
+    Private Sub Button2_KeyDown(ByVal sender As Object, ByVal e As System.Windows.Forms.KeyEventArgs) Handles Button2.KeyDown
+        If e.KeyCode = Keys.Enter Then
+            SerialPort1.Write(RichTextBox1.Text & vbCr) 
+        End If
+    End Sub
+
+
+
+
+
+
+    End Sub
+
+    Private Sub Timer1_Tick(ByVal sender As System.Object, ByVal e As System.EventArgs)
+
+
+
+    End Sub
+    Sub Bekle(ByVal dblSecs As Double)
+
+        Const saniye As Double = 1.0# / (1440.0# * 60.0#)
+        Dim beklet As Date
+        Now.AddSeconds(saniye)
+        beklet = Now.AddSeconds(saniye).AddSeconds(dblSecs)
+        Do Until Now > beklet
+            Application.DoEvents() ' Devam et
+        Loop
+
+    End Sub
